@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Spring AI Home</title>
+  <link rel="stylesheet" href="../css/springai.css" type="text/css">
+</head>
+<body>
+<br>
+<div align="center">
+  다음은 <span th:text="${title} + ' 예제 프로젝트입니다.'"></span>
+
+  <h3>OpenAI 서비스 선택</h3>
+
+  <a th:href="@{/aichat/?stream=no}">Non-Stream(일반)</a><br>
+  <a th:href="@{/aichat/?stream=yes}">Stream(실시간)</a><br>
+</div>
+</body>
+</html>

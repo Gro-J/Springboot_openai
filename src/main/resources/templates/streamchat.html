@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>OpenAI API Chat</title>
+    <link rel="stylesheet" href="../css/springai.css" type="text/css">
+</head>
+<body>
+<h2 align="center">OpenAI API 스트리밍 웹 채팅</h2>
+
+<div id="chatBox"></div>
+
+<div id="inputBox">
+    <input id="userInput"
+           type="text"
+           placeholder="메시지를 입력하세요"
+           onkeydown="if(event.key==='Enter') sendStream()">
+    <button onclick="sendStream()">전송(스트림)</button>
+</div>
+
+<script>
+    function sendStream() {
+        const userInput = document.getElementById("userInput");
+        const msg = userInput.value.trim();
+
+        if (msg === "") {
+            return;
+        }
+
+        addMessage("Questioner", msg);
+        userInput.value = "";
+
+        const aiBubble = createAiMessageBubble();
+        const url = "/aichat/streamchat?message=" + encodeURIComponent(msg);
+
+        const eventSource = new EventSource(url);
+        let accumulated = "";
+
+        eventSource.onmessage = function (event) {
+            accumulated += event.data;
+            aiBubble.textContent = accumulated;
+            scrollToBottom();
+        };
+
+        eventSource.onerror = function () {
+            eventSource.close();
+        };
+    }
+
+    function addMessage(sender, message) {
+        const box = document.getElementById("chatBox");
+        const label = document.createElement("p");
+
+        label.innerHTML = "<b>" + sender + ":</b> " + message;
+
+        box.appendChild(label);
+        scrollToBottom();
+    }
+
+    function createAiMessageBubble() {
+        const box = document.getElementById("chatBox");
+
+        const label = document.createElement("p");
+        label.innerHTML = "<b>AI Model:</b> ";
+
+        const bubble = document.createElement("div");
+        bubble.textContent = "";
+
+        box.appendChild(label);
+        box.appendChild(bubble);
+
+        scrollToBottom();
+
+        return bubble;
+    }
+
+    function scrollToBottom() {
+        const box = document.getElementById("chatBox");
+        box.scrollTop = box.scrollHeight;
+    }
+</script>
+</body>
+</html>
