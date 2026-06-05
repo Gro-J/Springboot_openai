@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>OpenAI API Chat & Vision</title>
+    <link rel="stylesheet" href="../css/vision.css" type="text/css">
+</head>
+<body>
+<h2 align="center">OpenAI API 웹 채팅 & 이미지 분석</h2>
+
+<div id="chatBox"></div>
+
+<div id="inputBox">
+    <label for="fileInput" id="fileLabel" class="file-upload-btn">이미지 첨부</label>
+    <input id="fileInput"
+           type="file"
+           accept="image/*"
+           onchange="updateFileName(this)"
+           style="display:none;">
+
+    <input id="userInput"
+           type="text"
+           placeholder="메시지를 입력하거나 이미지를 첨부하세요"
+           onkeydown="if(event.key==='Enter') sendMessage()">
+
+    <button onclick="sendMessage()">메시지 전송</button>
+</div>
+
+<script>
+    let currentFile = null;
+
+    async function sendMessage() {
+        const userInput = document.getElementById("userInput");
+        const message = userInput.value.trim();
+
+        if (message === "" && !currentFile) {
+            alert("메시지를 입력하거나 이미지를 첨부해주세요.");
+            return;
+        }
+
+        addMessage("Questioner", message || "[이미지 분석 요청]");
+        const aiMessageElement = addMessage("AI Model", "분석 중입니다...");
+
+        const formData = new FormData();
+        formData.append("message", message);
+
+        if (currentFile) {
+            formData.append("image", currentFile);
+        }
+
+        userInput.value = "";
+
+        try {
+            const response = await fetch("/aivision/analysis", {
+                method: "POST",
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error(`서버 오류: ${response.status}`);
+            }
+
+            const rawText = await response.text();
+            aiMessageElement.querySelector(".content pre").textContent = rawText;
+
+        } catch (error) {
+            aiMessageElement.querySelector(".content pre").textContent =
+                `에러 발생: ${error.message}`;
+        } finally {
+            resetFileInput();
+        }
+    }
+
+    function addMessage(sender, text) {
+        const chatBox = document.getElementById("chatBox");
+        const p = document.createElement("p");
+
+        const preStyle = `
+            font-family: inherit;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 0;
+        `;
+
+        p.innerHTML = `<b>${sender}:</b><div class="content"><pre style="${preStyle}">${text}</pre></div>`;
+
+        chatBox.appendChild(p);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        return p;
+    }
+
+    function updateFileName(input) {
+        const label = document.getElementById("fileLabel");
+
+        if (input.files && input.files.length > 0) {
+            currentFile = input.files[0];
+            label.textContent = currentFile.name;
+        } else {
+            currentFile = null;
+            label.textContent = "이미지 첨부";
+        }
+    }
+
+    function resetFileInput() {
+        currentFile = null;
+
+        const fileInput = document.getElementById("fileInput");
+
+        if (fileInput) {
+            fileInput.value = "";
+        }
+
+        document.getElementById("fileLabel").textContent = "이미지 첨부";
+    }
+</script>
+</body>
+</html>
