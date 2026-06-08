@@ -46,7 +46,6 @@ public class AiChatService {
                     }
 
                     String content = response.getResult().getOutput().getText();
-                    return content != null ? content : "";
-                });
+                    return content != null ? content.replace(" ", "\u00A0") : "";                });
     }
 }
