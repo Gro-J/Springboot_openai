@@ -1,5 +1,6 @@
 package org.tukorea.openai;
 
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,13 +28,15 @@ public class AiChatController {
 
     @PostMapping("/chat")
     @ResponseBody
-    public String getChatResponse(@RequestParam String message) {
-        return aiChatService.chatResponse(message);
+    public String getChatResponse(@RequestParam String message, HttpSession session) {
+        String sessionId = session.getId();
+        return aiChatService.chatResponse(message, sessionId);
     }
 
     @GetMapping(value = "/streamchat", produces = "text/event-stream")
     @ResponseBody
-    public Flux<String> getChatStream(@RequestParam String message) {
-        return aiChatService.chatStream(message);
+    public Flux<String> getChatStream(@RequestParam String message, HttpSession session) {
+        String sessionId = session.getId();
+        return aiChatService.chatStream(message, sessionId);
     }
 }
