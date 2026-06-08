@@ -14,7 +14,7 @@
   <input id="userInput"
          type="text"
          placeholder="메시지를 입력하세요"
-         onkeydown="if(event.key==='Enter') sendMessage()">
+         onkeydown="handleChatKeyDown(event)"
   <button onclick="sendMessage()">메시지 전송</button>
 </div>
 
@@ -50,6 +50,17 @@
 
     chatBox.appendChild(p);
     chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  function handleChatKeyDown(event) {
+    if (event.isComposing || event.keyCode === 229) {
+      return;
+    }
+
+    if (event.key === "Enter") {
+      event.preventDefault();
+      sendMessage();
+    }
   }
 </script>
 </body>
